@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Papa } from 'ngx-papaparse';
+import { SalesforceService } from './salesforce.service';
 
 @Component({
   selector: 'app-root',
@@ -7,14 +8,13 @@ import { Papa } from 'ngx-papaparse';
   styleUrls: ['./app.component.css']
 })
 
-
-
 export class AppComponent implements OnInit {
   title = 'Salesforce Mappy';
   csvFile = undefined;
   csvData = undefined;
+  salesforceContacts = undefined;
 
-  constructor (private papa: Papa) {} 
+  constructor (private papa: Papa, private sfService: SalesforceService) {} 
   ngOnInit() {}
 
   public uploadCSVFileAction() {
@@ -40,6 +40,10 @@ export class AppComponent implements OnInit {
 
   public retrieveSalesforceContacts() {
 
+    this.sfService.doSalesforceRestCallout('SELECT+Name+FROM+Contact').then(results => {
+      this.salesforceContacts = JSON.parse(results)["records"];
+    });
+    
   }
 
   // Step 1: Accept/Get the uploaded file 

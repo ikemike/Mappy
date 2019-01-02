@@ -13,22 +13,22 @@ import { SimplekeysService } from './simplekeys.service';
 export class SalesforceService {
 
   public accessToken;
-  public salesforceRestEndpoint = 'https://domaindemo-dev-ed.my.salesforce.com/services/apexrest/ilem/ExampleRestResource';
+  public salesforceRestEndpoint = 'https://domaindemo-dev-ed.my.salesforce.com/services/data/v43.0/query/?q=';
 
   constructor(private keys: SimplekeysService) { }
 
-  /* Do a special POST callout with the salesforce access token */
-  public doSalesforceRestCallout(requestBody) {
+  /* Do a special GET request with the salesforce access token */
+  public doSalesforceRestCallout(queryString) {
+    let fullRequestURL = this.salesforceRestEndpoint + queryString;
 
     // First get the access token 
-    this.getSFAccessToken().then(accessTokenResponse => {
+    let result = this.getSFAccessToken().then(accessTokenResponse => {
 
       let sfAccessToken = JSON.parse(accessTokenResponse)["access_token"];
-      
+
       // After retrieving access token (either previously stored, or newly created) make the REST callout
-      let salesforceRESTPromise = fetch(this.salesforceRestEndpoint, {  // Global variable endpoint
-        method: "POST",
-        body: requestBody,
+      let salesforceRESTPromise = fetch(fullRequestURL, {  // Global variable endpoint
+        method: "GET",
         headers : {
             'Content-Type': 'application/json',
             'Charset' : 'UTF-8',
@@ -36,19 +36,22 @@ export class SalesforceService {
             'Authorization' : `Bearer ${sfAccessToken}`
         }
       }).then(fetchedResponse => {
-        //console.log(fetchedResponse);
+        console.log(fetchedResponse);
         return fetchedResponse.text();
       }).catch((err) => {
+        console.log('Error');
         console.log(err);
       });
+
       return salesforceRESTPromise;
     });
+    return result;
+
   }
 
     /* UTILITY: Retrieve and return a Salesforce access token (needed for API REST queries) */
     public getSFAccessToken() {
       if (this.accessToken == null) {
-        console.log('Access token was null');
   
         let clientId = this.keys.getClientId();
         let clientSecret = this.keys.getClientSecret();
