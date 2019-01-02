@@ -6,9 +6,13 @@ import { Papa } from 'ngx-papaparse';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
+
+
+
 export class AppComponent implements OnInit {
   title = 'Salesforce Mappy';
   csvFile = undefined;
+  csvData = undefined;
 
   constructor (private papa: Papa) {} 
   ngOnInit() {}
@@ -17,6 +21,7 @@ export class AppComponent implements OnInit {
     // @ts-ignore (files isn't recognized)
     this.csvFile = document.getElementById("csvInputFileElement").files[0];
     if (this.csvFile == null) return;
+    let csvData = [];
     
     console.log('Uploading File...');
 
@@ -24,9 +29,16 @@ export class AppComponent implements OnInit {
     this.papa.parse(this.csvFile, {
       download: true,
 	    complete: function(results) {
-		    console.log("Row:", results.data);
-	    }
+        results.data.forEach(aResult => {
+          csvData.push(aResult);
+        })
+        console.log("Row:", results.data);
+      }
     });
+    this.csvData = csvData;
+  }
+
+  public retrieveSalesforceContacts() {
 
   }
 
