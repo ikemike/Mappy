@@ -15,11 +15,10 @@
 </div>
 
 <div class="row">
-
   <div class="col-md-6">
     <div class="list-group">
       <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-          <input type="file" id="csvInputFileElement" (click)="uploadCSVFileAction()"/>
+          <input type="file" id="csvInputFileElement"/>
           <button class="btn" (click)="uploadCSVFileAction()" [class.btn-outline-primary]="true">Upload CSV</button>
       </div>
     </div>
@@ -43,7 +42,7 @@
   </div>
 </div>
 
-<div class="row" style="padding-top:28px;">
+<div class="row" style="padding-top:28px;" *ngIf="salesforceContacts == undefined">
   <div class="col-md-12">
     <button (click)="retrieveSalesforceContacts();" class="btn btn-outline-primary">Retrieve Salesforce Data</button>
   </div>
@@ -54,6 +53,12 @@
             {{ contact.Name }}
         </div>
     </div>
+  </div>
+</div>
+
+<div class="row" style="padding-top:28px;">
+  <div class="col-md-12">
+      <button class="btn btn-outline-success" (click)="findContacts()">Match Contact Information</button>
   </div>
 </div>
 
