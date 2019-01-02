@@ -2,6 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { Papa } from 'ngx-papaparse';
 import { SalesforceService } from './salesforce.service';
 
+
+interface CSVHeader {
+  selected: boolean;
+  fieldName: string;
+}
+
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -10,8 +16,8 @@ import { SalesforceService } from './salesforce.service';
 
 export class AppComponent implements OnInit {
   title = 'Salesforce Mappy';
-  csvFile = undefined;
   csvData = undefined;
+  csvHeaderFields: CSVHeader[];
   salesforceContacts = undefined;
 
   constructor (private papa: Papa, private sfService: SalesforceService) {} 
@@ -19,16 +25,22 @@ export class AppComponent implements OnInit {
 
   public uploadCSVFileAction() {
     // @ts-ignore (files isn't recognized)
-    this.csvFile = document.getElementById("csvInputFileElement").files[0];
-    if (this.csvFile == null) return;
+    let csvFile = document.getElementById("csvInputFileElement").files[0];
+    if (csvFile == null) return;
     let csvData = [];
-    
+    let csvHeaderFields = [];
+
     console.log('Uploading File...');
 
-    // Stream big file in worker thread
-    this.papa.parse(this.csvFile, {
+    this.papa.parse(csvFile, {
       download: true,
 	    complete: function(results) {
+
+        // Save CSV Header Information
+        results.data[0].forEach(aColumnHeader => {
+          csvHeaderFields.push({selected: false, fieldName: aColumnHeader});
+        })
+
         results.data.forEach(aResult => {
           csvData.push(aResult);
         })
@@ -36,6 +48,7 @@ export class AppComponent implements OnInit {
       }
     });
     this.csvData = csvData;
+    this.csvHeaderFields = csvHeaderFields;
   }
 
   public retrieveSalesforceContacts() {
@@ -49,11 +62,14 @@ export class AppComponent implements OnInit {
     
   }
 
-  // Step 1: Accept/Get the uploaded file 
+  public selectCSVColumn(selectedField: CSVHeader) {
+    selectedField.selected = selectedField.selected ? false : true;
+  }
 
-  // Step 2: Retrieve Data from Salesforce for Comparison 
+  get selectedColumns() {
+    return this.csvHeaderFields.filter(aField => {
+      return aField.selected == true;
+    })
+  }
 
-  // Step 3: ???
-
-  // Step 4: Profit
 }

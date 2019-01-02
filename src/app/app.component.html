@@ -9,12 +9,13 @@
 
 <div class="row">
   <div class="col-md-12">
-      <div *ngIf="csvFile === undefined">Please select a file</div>
-      <div *ngIf="csvFile != undefined">File Loaded!</div>
+      <div *ngIf="csvData === undefined">Please select a file</div>
+      <div *ngIf="csvData != undefined">File Loaded!</div>
   </div>
 </div>
 
 <div class="row">
+
   <div class="col-md-6">
     <div class="list-group">
       <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
@@ -23,19 +24,22 @@
       </div>
     </div>
   </div>
-  <div class="col-md-6">
 
-    <div *ngIf="csvData !== undefined">
-      File Header:<br/>
-      <span *ngFor="let data of csvData[0]">{{ data }}&nbsp;</span>
-
-      <!--
-      <div *ngFor="let data of csvData; let i = index" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-        {{ i + 1 }}: {{ data[0] }} {{ data[1] }} 
+  <div class="col-md-4" *ngIf="csvData != undefined">
+    <h5>Fields from CSV</h5>
+    <div class="list-group">
+      <div 
+      (click)="selectCSVColumn(aField)" 
+      *ngFor="let aField of csvHeaderFields" 
+      class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+      [class.active]="aField.selected">
+          {{ aField.fieldName }}
       </div>
-    -->
     </div>
-
+    <div *ngFor="let selectedField of selectedColumns">
+      Selected: {{ selectedField.fieldName }}
+    </div>
+    
   </div>
 </div>
 
