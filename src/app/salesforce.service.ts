@@ -13,7 +13,8 @@ import { SimplekeysService } from './simplekeys.service';
 export class SalesforceService {
 
   public accessToken;
-  public salesforceRestEndpoint = 'https://domaindemo-dev-ed.my.salesforce.com/services/data/v43.0/query/?q=';
+  //public salesforceRestEndpoint = 'https://domaindemo-dev-ed.my.salesforce.com/services/data/v43.0/query/?q=';
+  public salesforceRestEndpoint = 'https://cs47.salesforce.com/services/data/v43.0/query/?q=';
 
   constructor(private keys: SimplekeysService) { }
 
@@ -25,6 +26,7 @@ export class SalesforceService {
     let result = this.getSFAccessToken().then(accessTokenResponse => {
 
       let sfAccessToken = JSON.parse(accessTokenResponse)["access_token"];
+      console.log('Access Token: ' + sfAccessToken);
 
       // After retrieving access token (either previously stored, or newly created) make the REST callout
       let salesforceRESTPromise = fetch(fullRequestURL, {  // Global variable endpoint
@@ -51,11 +53,11 @@ export class SalesforceService {
 
     /* UTILITY: Retrieve and return a Salesforce access token (needed for API REST queries) */
     public getSFAccessToken() {
-      if (this.accessToken == null) {
   
         let clientId = this.keys.getClientId();
         let clientSecret = this.keys.getClientSecret();
-        let tokenURL = 'https://domaindemo-dev-ed.my.salesforce.com/services/oauth2/token';
+        //let tokenURL = 'https://domaindemo-dev-ed.my.salesforce.com/services/oauth2/token';
+        let tokenURL = 'https://test.salesforce.com/services/oauth2/token';
         let username = this.keys.getSalesforceUsername();
         let password = this.keys.getSalesforcePassword();
         let securityToken = this.keys.getSalesforceSecurityToken();
@@ -75,10 +77,7 @@ export class SalesforceService {
           console.log(err);
         });
         this.accessToken = httpResponsePromise;
-        return httpResponsePromise;
-      } else {
-          return this.accessToken;
-      }
+        return this.accessToken;
     }
 
 }

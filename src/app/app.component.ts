@@ -40,8 +40,11 @@ export class AppComponent implements OnInit {
 
   public retrieveSalesforceContacts() {
 
-    this.sfService.doSalesforceRestCallout('SELECT+Name+FROM+Contact').then(results => {
+    this.sfService.doSalesforceRestCallout('SELECT+Name+,Email+FROM+Contact+LIMIT+5').then(results => {
       this.salesforceContacts = JSON.parse(results)["records"];
+      this.salesforceContacts.forEach(aContact => {
+        console.log(aContact);
+      })
     });
     
   }
