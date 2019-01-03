@@ -2,7 +2,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { AppComponent } from './app.component';
 import { PapaParseModule } from 'ngx-papaparse';
-
+import { HttpClientModule } from '@angular/common/http';
 
 @NgModule({
   declarations: [
@@ -11,6 +11,7 @@ import { PapaParseModule } from 'ngx-papaparse';
   imports: [
     BrowserModule
     , PapaParseModule
+    , HttpClientModule
   ], 
   providers: [],
   bootstrap: [AppComponent]

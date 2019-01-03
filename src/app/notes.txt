@@ -1,0 +1,2 @@
+01-03-2019: Working on getting rest API call to work via an observable 
+Added import { HttpClientModule } to app.module.ts

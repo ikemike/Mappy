@@ -46,8 +46,17 @@
   <div class="col-md-12">
     <button (click)="retrieveSalesforceContacts();" class="btn btn-outline-primary">Retrieve Salesforce Data</button>
   </div>
+</div>
 
-  <div class="col-md-6" style="padding-top:28px;">
+<div class="row" style="padding-top:28px;">
+  <div class="col-md-12">
+    <button (click)="retrieveContactsViaObservable();" class="btn btn-outline-dark">Try Retrieving Via Observable</button>
+  </div>
+</div>
+
+<!-- A display of all queried contacts 
+<div>
+  <div class="col-md-12" style="padding-top:28px;">
     <div class="list-group">
         <div *ngFor="let contact of salesforceContacts" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
             {{ contact.Name }}
@@ -55,6 +64,7 @@
     </div>
   </div>
 </div>
+-->
 
 <div class="row" style="padding-top:28px;">
   <div class="col-md-12">
