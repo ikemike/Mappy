@@ -20,10 +20,15 @@ export class AppComponent implements OnInit {
   title = 'Salesforce Mappy';
   csvData = undefined;
   csvHeaderFields: CSVHeader[];
-  salesforceContacts = undefined;
+  salesforceRecords = [];
+  matchCollection = [];
+  
 
   constructor (private papa: Papa, private sfService: SalesforceService) {} 
-  ngOnInit() {}
+  ngOnInit() {
+    this.retrieveSalesforceRecords();
+  }
+  
 
   public uploadCSVFileAction() {
     // @ts-ignore (files isn't recognized)
@@ -61,51 +66,29 @@ export class AppComponent implements OnInit {
     return csvHeaderFields;
   }
 
-  // TODO: Make this recurring based on 'nextRecordsURL'
-  public retrieveSalesforceContacts() {
-    this.salesforceContacts = [];
-    let baseurl = 'https://cs47.salesforce.com/services/data/v43.0/query/?q=';
-    let query = 'SELECT+Name+,Email+FROM+Contact+LIMIT+3000';
-    let nextRecordsUrl = '';
+  public retrieveSalesforceRecords() {
+    let serviceUrl = 'https://cs47.salesforce.com/services/data/v43.0/query/?q=';
+    let query = 'SELECT+Name+,+Capital_IQ_ID__c+FROM+Account';
+    this.salesforceRecords = [];
 
-
-    this.sfService.doSalesforceRestCallout(baseurl + query).then(results => {
-      //let records = JSON.parse(results)["records"];
-      //records.forEach(aRecord => { this.salesforceContacts.push(aRecord)})
-
-
-      let nextRecordUrl = JSON.parse(results)["nextRecordsUrl"];
-
-
-      console.log(this.salesforceContacts.length + ' Contacts Retrieved');
-      console.log(nextRecordUrl);
+    this.sfService.getSFAccessToken().then(token => {
+      this.doObservableGetCallout(JSON.parse(token)["access_token"], serviceUrl + query).subscribe(
+        data => {
+          let records = data["records"];
+          records.forEach(aRecord => { this.salesforceRecords.push(aRecord)})
+          console.log(this.salesforceRecords.length);
+        }
+      )
     });
-
-    // Version 2.0 Attempt to use the "nextRecordsUrl" property
   }
 
-  public doObservableGetCallout() {
-    let baseurl = 'https://cs47.salesforce.com/services/data/v43.0/query/?q=';
-    let base = 'https://cs47.salesforce.com/';
-
-    let query = 'SELECT+Name+,Email+FROM+Contact';
-
-    return this.sfService.observableCallout(baseurl + query)
+  public doObservableGetCallout(accessToken: string, restEndpoint: string) {
+    let baseUrl = restEndpoint.substring(0, restEndpoint.indexOf(".com") + 5);
+    return this.sfService.observableCallout(restEndpoint, accessToken)
       .pipe(expand(
-        // Expand will keep adding observables until empty - 
-        // in this case, using the 'next' property of the response
-        (data, i) => (<any> data).nextRecordsUrl ? this.sfService.observableCallout(base+(<any> data).nextRecordsUrl) : empty()
+        // Expand will keep adding observables until empty - in this case, using the 'next' property of the response
+        (data, i) => (<any> data).nextRecordsUrl ? this.sfService.observableCallout(baseUrl+(<any> data).nextRecordsUrl, accessToken) : empty()
       ));
-  }
-
-  public retrieveContactsViaObservable() {
-    this.doObservableGetCallout().subscribe(
-      data => {
-        let records = data["records"];
-        records.forEach(aRecord => { this.salesforceContacts.push(aRecord)})
-        console.log(this.salesforceContacts.length);
-      }
-    )
   }
 
   // UI interaction for showing which CSV fields are currently selected
@@ -120,12 +103,79 @@ export class AppComponent implements OnInit {
     })
   }
 
+  // Basic method compares CSV and SFDC data by selected columns
+  public searchForMatches() {
+    let matchObjectExample = { "csvRecord": undefined, "salesforceRecords": [] };
+    let matchCollection = []
+
+    let columnMatching = 'Account Name';
+    let sfColumnName = 'Name';
+
+    /*
+    let matchedCSVRecords = this.csvData.filter(aCSVRecord => {
+      let matchRecord = { "csvRecord": aCSVRecord, "salesforceRecords": [] };
+      return this.salesforceRecords.some(aSFRecord => {
+        if (aCSVRecord[columnMatching] === aSFRecord[sfColumnName]) matchRecord.salesforceRecords.push(aSFRecord);
+        return aCSVRecord[columnMatching] === aSFRecord[sfColumnName];
+      })
+    })
+    */
+
+    for (let i = 0; i < this.csvData.length; i++) {
+      let matchRecord = { "csvRecord": this.csvData[i], "salesforceRecords": [] };
+      for (let j = 0; j < this.salesforceRecords.length; j++) {
+        if (this.csvData[i][columnMatching] == this.salesforceRecords[j][sfColumnName]) {
+          matchRecord.salesforceRecords.push(this.salesforceRecords[j]);
+        }
+      }
+      matchCollection.push(matchRecord);
+    }
+    console.log(matchCollection);
+
+
+    let matchedSFRecords = this.salesforceRecords.filter(aSFRecord => {
+      return this.csvData.some(aCSVRecord => {
+        return aCSVRecord[columnMatching] === aSFRecord[sfColumnName];
+      })
+    })  
+    //console.log(matchedCSVRecords);
+    console.log(matchedSFRecords);
+
+    this.matchCollection = matchCollection;
+  }
+
+
+
   //Method uses the provided CSV document to attempt to find duplicates 
   public findContacts() {
+    
     let matchedRecords = [];
+    let selectedFilterColumns = this.selectedColumns;
 
-    for (let i = 0; i < this.salesforceContacts.length; i++) {
-      let sfContact = this.salesforceContacts[i];
+    console.log('Selected Columns Include: ' + selectedFilterColumns);
+    
+    let matchedContacts = this.salesforceRecords.filter(aSFContact => {
+      for (let i = 0; i < this.csvData.length; i++) {
+        let excelContact = this.csvData[i];
+        for (let j = 0; j < selectedFilterColumns.length; j++) {
+          return excelContact[j] === aSFContact[j];
+        }
+      }
+    })
+      /*
+      return this.csvData.filter(anExcelContact => {
+        return anExcelContact.Email === aSFContact.Email;
+        /*
+        return selectedFilterColumns.forEach(aColumn => {
+          return anExcelContact(aColumn) === aSFContact(aColumn);
+        })
+        
+      })
+    })
+    */
+    console.log(matchedContacts);
+    for (let i = 0; i < this.salesforceRecords.length; i++) {
+      let sfContact = this.salesforceRecords[i];
       for (let j = 0; j < this.csvData.length; j++) {
         let csvContact = this.csvData[j];
         if (sfContact.Email === csvContact.Email && csvContact.Email != '') {
@@ -133,11 +183,7 @@ export class AppComponent implements OnInit {
         }
       }
     }
-
-    
-    
     console.log(matchedRecords);
-
   }
 
 }

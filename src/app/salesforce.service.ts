@@ -55,7 +55,7 @@ export class SalesforceService {
   }
 
   // Returns an Observable! 
-  public observableCallout(salesforceRestEndpoint: string) {
+  public observableCallout(salesforceRestEndpoint: string, accessToken: string) {
     
     // Configure the HTTP Headers
     const httpOptions = {
@@ -63,12 +63,11 @@ export class SalesforceService {
         'Content-Type':  'application/json',
         'Charset' : 'UTF-8',
         'Accept' : 'application/json',
-        'Authorization' : `Bearer ${this.accessToken}`
+        'Authorization' : `Bearer ${accessToken}`
       })
     };
 
     // Make the XML Http Request
-    console.log('Observable Callout');
     return this.httpSvc.get(salesforceRestEndpoint, httpOptions);
   }
 
@@ -102,6 +101,7 @@ export class SalesforceService {
           console.log(err);
         });
         this.accessToken = httpResponsePromise;
+        
         return this.accessToken;
     }
 

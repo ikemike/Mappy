@@ -1,2 +1,7 @@
 01-03-2019: Working on getting rest API call to work via an observable 
 Added import { HttpClientModule } to app.module.ts
+
+01-17-2019: Electron build
+https://github.com/ikemike/Mappy/commit/e9172ba91d764d389114bf952f5507d8f34684b8
+To launch: npm run Electron
+

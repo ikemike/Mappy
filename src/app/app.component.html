@@ -35,24 +35,22 @@
           {{ aField.fieldName }}
       </div>
     </div>
+    <!-- Debug of selected columns 
     <div *ngFor="let selectedField of selectedColumns">
       Selected: {{ selectedField.fieldName }}
     </div>
+  -->
     
   </div>
 </div>
 
-<div class="row" style="padding-top:28px;" *ngIf="salesforceContacts == undefined">
-  <div class="col-md-12">
-    <button (click)="retrieveSalesforceContacts();" class="btn btn-outline-primary">Retrieve Salesforce Data</button>
-  </div>
-</div>
-
+<!-- Method retrieves all salesforce records (accounts or contacts)
 <div class="row" style="padding-top:28px;">
   <div class="col-md-12">
-    <button (click)="retrieveContactsViaObservable();" class="btn btn-outline-dark">Try Retrieving Via Observable</button>
+    <button (click)="retrieveSalesforceRecords();" class="btn btn-outline-dark">Retrieve Records from Salesforce</button>
   </div>
 </div>
+-->
 
 <!-- A display of all queried contacts 
 <div>
@@ -68,7 +66,21 @@
 
 <div class="row" style="padding-top:28px;">
   <div class="col-md-12">
-      <button class="btn btn-outline-success" (click)="findContacts()">Match Contact Information</button>
+      <button class="btn btn-outline-success" (click)="searchForMatches()">Match Data</button>
+  </div>
+</div>
+
+<!-- A display of all matched CSV and Salesforce records -->
+<div class="row">
+  <div class="col-md-12" style="padding-top:28px;">
+    <div class="list-group">
+        <div *ngFor="let aRecord of matchCollection" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+            {{ aRecord.csvRecord["Account Name"] }}<br/>
+            <div *ngFor="let aSalesforceRecord of aRecord.salesforceRecords">
+              {{ aSalesforceRecord["Name"] }}
+            </div>
+        </div>
+    </div>
   </div>
 </div>
 
